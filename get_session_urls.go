@@ -10,7 +10,28 @@ func getSessionURLs(err error, client *nex.Client, callID uint32, gatheringId ui
 
 	hostpid, _, _, _, _ := getRoomInfo(gatheringId)
 
-	stationUrlStrings = getPlayerUrls(hostpid)
+	if(hostpid == 0xffffffff){
+		// Build response packet
+		rmcResponse := nex.NewRMCResponse(nexproto.MatchMakingProtocolID, callID)
+		rmcResponse.SetSuccess(nexproto.MatchMakingMethodGetSessionURLs, nil)
+	
+		rmcResponseBytes := rmcResponse.Bytes()
+	
+		responsePacket, _ := nex.NewPacketV1(client, nil)
+	
+		responsePacket.SetVersion(1)
+		responsePacket.SetSource(0xA1)
+		responsePacket.SetDestination(0xAF)
+		responsePacket.SetType(nex.DataPacket)
+		responsePacket.SetPayload(rmcResponseBytes)
+	
+		responsePacket.AddFlag(nex.FlagNeedsAck)
+		responsePacket.AddFlag(nex.FlagReliable)
+	
+		nexServer.Send(responsePacket)
+	}
+
+	stationUrlStrings = getPlayerUrls(nexServer.FindClientFromPID(hostpid).ConnectionID())
 
 	rmcResponseStream := nex.NewStreamOut(nexServer)
 	rmcResponseStream.WriteListString(stationUrlStrings)
@@ -23,9 +44,9 @@ func getSessionURLs(err error, client *nex.Client, callID uint32, gatheringId ui
 
 	rmcResponseBytes := rmcResponse.Bytes()
 
-	responsePacket, _ := nex.NewPacketV0(client, nil)
+	responsePacket, _ := nex.NewPacketV1(client, nil)
 
-	responsePacket.SetVersion(0)
+	responsePacket.SetVersion(1)
 	responsePacket.SetSource(0xA1)
 	responsePacket.SetDestination(0xAF)
 	responsePacket.SetType(nex.DataPacket)

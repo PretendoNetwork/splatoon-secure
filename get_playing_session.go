@@ -3,13 +3,19 @@ package main
 import (
 	nex "github.com/PretendoNetwork/nex-go"
 	nexproto "github.com/PretendoNetwork/nex-protocols-go"
+	"fmt"
+	"encoding/hex"
 )
 
-func replaceURL(err error, client *nex.Client, callID uint32, oldStation *nex.StationURL, newStation *nex.StationURL) {
-	updatePlayerSessionUrl(client.ConnectionID(), oldStation.EncodeToString(), newStation.EncodeToString())
+func getPlayingSession(err error, client *nex.Client, callID uint32, listPID []uint32) {
+	rmcResponseStream := nex.NewStreamOut(nexServer)
+	rmcResponseStream.WriteUInt32LE(0)
 
-	rmcResponse := nex.NewRMCResponse(nexproto.SecureProtocolID, callID)
-	rmcResponse.SetSuccess(nexproto.SecureMethodReplaceURL, nil)
+	rmcResponseBody := rmcResponseStream.Bytes()
+	fmt.Println(hex.EncodeToString(rmcResponseBody))
+
+	rmcResponse := nex.NewRMCResponse(nexproto.MatchmakeExtensionProtocolID, callID)
+	rmcResponse.SetSuccess(nexproto.MatchmakeExtensionMethodGetPlayingSession, rmcResponseBody)
 
 	rmcResponseBytes := rmcResponse.Bytes()
 

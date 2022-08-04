@@ -5,11 +5,10 @@ import (
 	nexproto "github.com/PretendoNetwork/nex-protocols-go"
 )
 
-func replaceURL(err error, client *nex.Client, callID uint32, oldStation *nex.StationURL, newStation *nex.StationURL) {
-	updatePlayerSessionUrl(client.ConnectionID(), oldStation.EncodeToString(), newStation.EncodeToString())
-
-	rmcResponse := nex.NewRMCResponse(nexproto.SecureProtocolID, callID)
-	rmcResponse.SetSuccess(nexproto.SecureMethodReplaceURL, nil)
+func unregisterGathering(err error, client *nex.Client, callID uint32, gatheringId uint32) {
+	//destroyRoom(gatheringId)
+	rmcResponse := nex.NewRMCResponse(nexproto.MatchMakingProtocolID, callID)
+	rmcResponse.SetSuccess(nexproto.MatchmakingMethodUnregisterGathering, nil)
 
 	rmcResponseBytes := rmcResponse.Bytes()
 

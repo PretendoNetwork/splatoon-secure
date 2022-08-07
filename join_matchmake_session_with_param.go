@@ -77,7 +77,7 @@ func joinMatchmakeSessionWithParam(err error, client *nex.Client, callID uint32,
 	data, _ := hex.DecodeString("0023000000"+gidString+hostpidString+hostpidString+"000008005f00000000000000000a000000000000010000035c01000001000000060000008108020107000000020000000100000010000000000000000101000000d4000000088100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ea801c8b0000000000010100410000000010011c010000006420000000161466a08c8df18b118ed5a67650a47435f081d09804a7c1902b145e18eff47c00000000001c000000020000000400405352000301050040474952000103000000000000008f7e9e961f000000010000000000000000")
 
 	rmcResponse := nex.NewRMCResponse(nexproto.MatchmakeExtensionProtocolID, callID)
-	rmcResponse.SetSuccess(nexproto.MatchmakeExtensionMethodCreateMatchmakeSessionWithParam, data)
+	rmcResponse.SetSuccess(nexproto.MatchmakeExtensionMethodJoinMatchmakeSessionWithParam, data)
 
 	rmcResponseBytes := rmcResponse.Bytes()
 
@@ -102,8 +102,22 @@ func joinMatchmakeSessionWithParam(err error, client *nex.Client, callID uint32,
 	fmt.Println(hex.EncodeToString(data))
 	rmcMessage.SetParameters(data)
 	rmcMessageBytes := rmcMessage.Bytes()
+	
+	targetClient := nexServer.FindClientFromPID(uint32(hostpid))
 
-	messagePacket, _ := nex.NewPacketV1(client, nil)
+	messagePacket, _ := nex.NewPacketV1(targetClient, nil)
+	messagePacket.SetVersion(1)
+	messagePacket.SetSource(0xA1)
+	messagePacket.SetDestination(0xAF)
+	messagePacket.SetType(nex.DataPacket)
+	messagePacket.SetPayload(rmcMessageBytes)
+
+	messagePacket.AddFlag(nex.FlagNeedsAck)
+	messagePacket.AddFlag(nex.FlagReliable)
+
+	nexServer.Send(messagePacket)
+
+	messagePacket, _ = nex.NewPacketV1(client, nil)
 	messagePacket.SetVersion(1)
 	messagePacket.SetSource(0xA1)
 	messagePacket.SetDestination(0xAF)

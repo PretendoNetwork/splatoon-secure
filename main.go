@@ -8,6 +8,7 @@ import (
 	nexproto "github.com/PretendoNetwork/nex-protocols-go"
 	nexnattraversal "github.com/PretendoNetwork/nex-protocols-common-go/nat-traversal"
 	nexsecure "github.com/PretendoNetwork/nex-protocols-common-go/secure-connection"
+	nexmatchmaking "github.com/PretendoNetwork/nex-protocols-common-go/matchmaking"
 )
 
 type MatchmakingData struct {
@@ -55,7 +56,6 @@ func main() {
 		fmt.Println("Leaving")
 	})
 	matchmakeExtensionProtocolServer := nexproto.NewMatchmakeExtensionProtocol(nexServer)
-	matchMakingProtocolServer := nexproto.NewMatchMakingProtocol(nexServer)
 	matchMakingExtProtocolServer := nexproto.NewMatchMakingExtProtocol(nexServer)
 	rankingProtocolServer := nexproto.NewRankingProtocol(nexServer)
 
@@ -84,11 +84,14 @@ func main() {
 	matchmakeExtensionProtocolServer.UpdateProgressScore(updateProgressScore)
 	matchmakeExtensionProtocolServer.CreateMatchmakeSessionWithParam(createMatchmakeSessionWithParam)
 	matchmakeExtensionProtocolServer.JoinMatchmakeSessionWithParam(joinMatchmakeSessionWithParam)
-
-	matchMakingProtocolServer.GetSessionURLs(getSessionURLs)
-	matchMakingProtocolServer.UpdateSessionHost(updateSessionHost)
-	matchMakingProtocolServer.UpdateSessionHostV1(updateSessionHostV1)
-	matchMakingProtocolServer.UnregisterGathering(unregisterGathering)
+	
+	matchMakingProtocolServer := nexmatchmaking.InitMatchmakingProtocol(nexServer)
+	nexmatchmaking.GetConnectionUrls(getPlayerUrls)
+	nexmatchmaking.UpdateRoomHost(updateRoomHost)
+	nexmatchmaking.DestroyRoom(destroyRoom)
+	nexmatchmaking.GetRoomInfo(getRoomInfo)
+	nexmatchmaking.GetRoomPlayers(getRoomPlayers)
+	_ = matchMakingProtocolServer
 
 	matchMakingExtProtocolServer.EndParticipation(endParticipation)
 

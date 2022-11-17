@@ -3,18 +3,13 @@ package main
 import (
 	nex "github.com/PretendoNetwork/nex-go"
 	nexproto "github.com/PretendoNetwork/nex-protocols-go"
-	"strconv"
 )
 
-func replaceURL(err error, client *nex.Client, callID uint32, oldStation *nex.StationURL, newStation *nex.StationURL) {
-	updatePlayerSessionUrl(client.ConnectionID(), oldStation.EncodeToString(), newStation.EncodeToString())
-	if(newStation.Type() == "3"){
-		port, _ := strconv.Atoi(newStation.Port())
-		client.SetPort(port)
-	}
+func openParticipation(err error, client *nex.Client, callID uint32, gatheringId uint32) {
+	//destroyRoom(gatheringId)
 
-	rmcResponse := nex.NewRMCResponse(nexproto.SecureProtocolID, callID)
-	rmcResponse.SetSuccess(nexproto.SecureMethodReplaceURL, nil)
+	rmcResponse := nex.NewRMCResponse(nexproto.MatchmakeExtensionProtocolID, callID)
+	rmcResponse.SetSuccess(nexproto.MatchmakeExtensionMethodOpenParticipation, nil)
 
 	rmcResponseBytes := rmcResponse.Bytes()
 

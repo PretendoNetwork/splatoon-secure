@@ -9,6 +9,7 @@ import (
 	nexnattraversal "github.com/PretendoNetwork/nex-protocols-common-go/nat-traversal"
 	nexsecure "github.com/PretendoNetwork/nex-protocols-common-go/secure-connection"
 	nexmatchmaking "github.com/PretendoNetwork/nex-protocols-common-go/matchmaking"
+	nexmatchmakeextension "github.com/PretendoNetwork/nex-protocols-common-go/matchmake_extension"
 )
 
 type MatchmakingData struct {
@@ -36,8 +37,10 @@ func main() {
 	nexServer.SetPrudpVersion(1)
 	nexServer.SetNexVersion(40000)
 	nexServer.SetKerberosKeySize(32)
+	nexServer.SetKerberosPassword("AAAAAAAAAAAAA")
+	nexServer.SetPRUDPProtocolMinorVersion(2)
 	nexServer.SetAccessKey(config.AccessKey)
-	nexServer.SetPingTimeout(5)
+	nexServer.SetPingTimeout(10)
 
 	nexServer.On("Data", func(packet *nex.PacketV1) {
 		request := packet.RMCRequest()
@@ -55,8 +58,8 @@ func main() {
 
 		fmt.Println("Leaving")
 	})
-	matchmakeExtensionProtocolServer := nexproto.NewMatchmakeExtensionProtocol(nexServer)
 	matchMakingExtProtocolServer := nexproto.NewMatchMakingExtProtocol(nexServer)
+	_ = matchMakingExtProtocolServer
 	rankingProtocolServer := nexproto.NewRankingProtocol(nexServer)
 
 	// have datastore available if called, but respond as unimplemented
@@ -78,19 +81,26 @@ func main() {
 	secureProto.ReplaceConnectionUrl(updatePlayerSessionUrl)
 	secureServer = secureProto.SecureProtocol
 
+	matchmakeExtensionProtocolServer := nexmatchmakeextension.NewCommonMatchmakeExtensionProtocol(nexServer)
+	matchmakeExtensionProtocolServer.DestroyRoom(destroyRoom)
+	matchmakeExtensionProtocolServer.GetRoom(getRoom)
+	matchmakeExtensionProtocolServer.FindRoomViaMatchmakeSession(findRoomViaMatchmakeSession)
+	matchmakeExtensionProtocolServer.AddPlayerToRoom(addPlayerToRoom)
+	matchmakeExtensionProtocolServer.NewRoom(newRoom)
+	matchmakeExtensionProtocolServer.GetRoomPlayers(getRoomPlayers)
 	matchmakeExtensionProtocolServer.CloseParticipation(closeParticipation)
-	matchmakeExtensionProtocolServer.AutoMatchmakeWithParam_Postpone(autoMatchmakeWithParam_Postpone)
+	matchmakeExtensionProtocolServer.OpenParticipation(openParticipation)
 	matchmakeExtensionProtocolServer.GetPlayingSession(getPlayingSession)
 	matchmakeExtensionProtocolServer.UpdateProgressScore(updateProgressScore)
-	matchmakeExtensionProtocolServer.CreateMatchmakeSessionWithParam(createMatchmakeSessionWithParam)
-	matchmakeExtensionProtocolServer.JoinMatchmakeSessionWithParam(joinMatchmakeSessionWithParam)
+	matchmakeExtensionProtocolServer.UpdateNotificationData(updateNotificationData)
 	
 	matchMakingProtocolServer := nexmatchmaking.InitMatchmakingProtocol(nexServer)
 	nexmatchmaking.GetConnectionUrls(getPlayerUrls)
 	nexmatchmaking.UpdateRoomHost(updateRoomHost)
 	nexmatchmaking.DestroyRoom(destroyRoom)
-	nexmatchmaking.GetRoomInfo(getRoomInfo)
+	nexmatchmaking.GetRoom(getRoom)
 	nexmatchmaking.GetRoomPlayers(getRoomPlayers)
+	matchMakingProtocolServer.UpdateSessionHost(updateSessionHost)
 	_ = matchMakingProtocolServer
 
 	matchMakingExtProtocolServer.EndParticipation(endParticipation)

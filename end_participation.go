@@ -1,14 +1,15 @@
 package main
 
 import (
-	nex "github.com/PretendoNetwork/nex-go"
+	"github.com/PretendoNetwork/nex-go"
 	nexproto "github.com/PretendoNetwork/nex-protocols-go"
 )
 
-func unregisterGathering(err error, client *nex.Client, callID uint32, gatheringId uint32) {
-	//destroyRoom(gatheringId)
-	rmcResponse := nex.NewRMCResponse(nexproto.MatchMakingProtocolID, callID)
-	rmcResponse.SetSuccess(nexproto.MatchMakingMethodUnregisterGathering, nil)
+func endParticipation(err error, client *nex.Client, callID uint32, idGathering uint32, strMessage string) {
+	removePlayer(client.PID())
+	
+	rmcResponse := nex.NewRMCResponse(nexproto.MatchMakingExtMethodEndParticipation, callID)
+	rmcResponse.SetSuccess(nexproto.MatchMakingExtProtocolID, []byte{0x01})
 
 	rmcResponseBytes := rmcResponse.Bytes()
 

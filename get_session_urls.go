@@ -8,7 +8,7 @@ import (
 func getSessionURLs(err error, client *nex.Client, callID uint32, gatheringId uint32) {
 	var stationUrlStrings []string
 
-	hostpid, _, _, _, _ := getRoomInfo(gatheringId)
+	hostpid, hostRVCID, _ := getRoom(gatheringId)
 
 	if(hostpid == 0xffffffff){
 		// Build response packet
@@ -31,7 +31,7 @@ func getSessionURLs(err error, client *nex.Client, callID uint32, gatheringId ui
 		nexServer.Send(responsePacket)
 	}
 
-	stationUrlStrings = getPlayerUrls(nexServer.FindClientFromPID(hostpid).ConnectionID())
+	stationUrlStrings = getPlayerUrls(hostRVCID)
 
 	rmcResponseStream := nex.NewStreamOut(nexServer)
 	rmcResponseStream.WriteListString(stationUrlStrings)

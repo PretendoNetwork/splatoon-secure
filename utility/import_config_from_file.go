@@ -1,44 +1,20 @@
-package main
+package utility
 
 import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+
+	"github.com/PretendoNetwork/splatoon-secure/types"
 )
 
-type ServerConfig struct {
-	ServerName            string
-	ServerPort            string
-	PrudpVersion          int
-	SignatureVersion      int
-	KerberosKeySize       int
-	AccessKey             string
-	NexVersion            int
-	NEXDatabaseIP         string
-	NEXDatabasePort       string
-	AccountDatabaseIP     string
-	AccountDatabasePort   string
-	DatabaseUseAuth       bool
-	DatabaseUsername      string
-	DatabasePassword      string
-	AccountDatabase       string
-	PNIDCollection        string
-	NexAccountsCollection string
-	SplatoonDatabase      string
-	RoomsCollection       string
-	SessionsCollection    string
-	UsersCollection       string
-	RegionsCollection     string
-	TournamentsCollection string
-}
-
-func ImportConfigFromFile(path string) (*ServerConfig, error) {
+func ImportConfigFromFile(path string) (*types.ServerConfig, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 	indexes := strings.Split(string(data), "\n")
-	config := &ServerConfig{
+	config := &types.ServerConfig{
 		ServerName:      "server",
 		KerberosKeySize: 32,
 	}

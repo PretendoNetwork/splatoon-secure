@@ -1,14 +1,14 @@
-package main
+package nex_ranking
 
 import (
 	nex "github.com/PretendoNetwork/nex-go"
-	nexproto "github.com/PretendoNetwork/nex-protocols-go"
+	"github.com/PretendoNetwork/nex-protocols-go/ranking"
+	"github.com/PretendoNetwork/splatoon-secure/globals"
 )
 
-func unregisterGathering(err error, client *nex.Client, callID uint32, gatheringId uint32) {
-	//destroyRoom(gatheringId)
-	rmcResponse := nex.NewRMCResponse(nexproto.MatchMakingProtocolID, callID)
-	rmcResponse.SetSuccess(nexproto.MatchmakingMethodUnregisterGathering, nil)
+func UploadCommonData(err error, client *nex.Client, callID uint32, commonData []byte, uniqueID uint64) {
+	rmcResponse := nex.NewRMCResponse(ranking.ProtocolID, callID)
+	rmcResponse.SetSuccess(ranking.MethodUploadCommonData, nil)
 
 	rmcResponseBytes := rmcResponse.Bytes()
 
@@ -23,5 +23,5 @@ func unregisterGathering(err error, client *nex.Client, callID uint32, gathering
 	responsePacket.AddFlag(nex.FlagNeedsAck)
 	responsePacket.AddFlag(nex.FlagReliable)
 
-	nexServer.Send(responsePacket)
+	globals.NEXServer.Send(responsePacket)
 }
